@@ -1,0 +1,120 @@
+#img{
+	border: none;
+}
+
+#name{
+	font-family: Arial;
+	font-size: 14px;
+	color: #41658c;
+}
+
+#status{
+	font-size: 13px;
+	font-family: Arial;
+}
+
+#add_but{
+	float: left;
+	padding-top: 2px;
+	padding-right: 5px;
+}
+
+#add_txt{
+	font-family: Arial;
+	font-size: 12px;
+	color: #161616;
+	padding-top: 7px;
+	padding-bottom: 8px;
+}
+
+
+
+#to_up{
+	font-family: Arial;
+	font-size: 12px;
+	color: #161616;
+	float: left;
+	padding-top: 7px;
+	padding-right: 5px;
+	padding-left: 60px;
+}
+
+#to_up_but{
+	padding-top: 3px;
+}
+
+#birth_date{
+	font-family: Arial;
+	font-size: 12px;
+	color: #616161;
+	float: left;
+	padding-right: 39px;
+}
+
+#firjan{
+	font-family: Arial;
+	font-size: 12px;
+	color: #41658c;
+}
+
+
+#politics{
+	font-family: Arial;
+	font-size: 12px;
+	color: #616161;
+	float: left;
+	padding-right: 40px;
+	padding-top: 2px;
+}
+
+#family{
+	font-family: Arial;
+	font-size: 12px;
+	color: #616161;
+	float: left;
+	padding-right: 90px;
+	padding-top: 2px;
+}
+
+#polit_ind{
+	font-family: Arial;
+	font-size: 12px;
+	color: #41658c;
+	padding-top: 2px;
+}
+
+#foto_block_long{
+	padding-top: 6px;
+}
+
+
+#fam_name{
+	font-family: Arial;
+	font-size: 12px;
+	color: #41658c;
+	padding-top: 2px;
+}
+
+#name_wall{
+	font-family: Arial;
+	font-size: 13px;
+	color: #41658c;
+	padding-top: 7px;
+}
+
+#ava_mini{
+	float:left;
+	padding-top: 8px; 
+	padding-right: 8px;
+}
+
+#spam{
+	padding-top: 2px;
+	font-family: Arial;
+	font-size: 12px;
+	color: #161616;
+}
+
+#img_mini{
+	padding-top: 8px;
+}
