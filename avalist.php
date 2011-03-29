@@ -67,7 +67,7 @@
 		<div id="workspace" align="left">
 		
 		<div id="inptext">
-			<form id="upload" action="load.php" method="post">
+			<form id="upload" action="load.php" method="post" enctype="multipart/form-data">
 					<div style="margin-left:200px; margin-top:200px;">
 					
 						<div class="im_input">

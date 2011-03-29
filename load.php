@@ -1,7 +1,6 @@
 <?php
 // В PHP 4.1.0 и более ранних версиях следует использовать $HTTP_POST_FILES
 // вместо $_FILES.
-
 error_reporting(0);
 
 include "simple.php";
@@ -96,7 +95,7 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 			 text-decoration:none;"
 		onClick="vk_cut(cut);">Сделать аватарку</a>
 	</div>
-	<script>getUserInfo();</script>
+	<script>//getUserInfo();</script>
 	<? } else if ($_POST["type"] == "list") { ?>
 	<div id="alt_second" style="overflow:hidden; background-color:#D5EAF8;">
 			
