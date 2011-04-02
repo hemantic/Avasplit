@@ -16,7 +16,7 @@ $uploadfile = $uploaddir . basename($_FILES['filename']['name']);
 $count = $_POST["count"] * 15;
 $radio = $_POST["show_choose"];
 
-if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) { 
+if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 	if($_POST["type"] == "avalist") {
 	?>
 	<div id="second">
@@ -93,7 +93,7 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 			 padding:10px;
 			 background-color:#e9edf1;
 			 text-decoration:none;"
-		onClick="vk_cut(cut);">Сделать аватарку</a>
+		onClick="cut();">Сделать аватарку</a>
 	</div>
 	<script>//getUserInfo();</script>
 	<? } else if ($_POST["type"] == "list") { ?>
