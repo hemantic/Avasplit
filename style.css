@@ -21,10 +21,10 @@ a { z-index:15; }
 }
 
 hr {
-	color:#CCCCCC; /*длЯ IE*/
+	color:#CCCCCC; /*Г¤Г«Гџ IE*/
 	margin-top:3px;
 	margin-bottom:13px;
-	background-color:#CCCCCC; /*длЯ нормальных браузеров*/
+	background-color:#CCCCCC; /*Г¤Г«Гџ Г­Г®Г°Г¬Г Г«ГјГ­Г»Гµ ГЎГ°Г ГіГ§ГҐГ°Г®Гў*/
 	border:none;
 	height:1px;
 }
@@ -612,4 +612,33 @@ ul#pikame li img{position:relative;cursor:pointer;}
 	height:21px;
 	border:none;
 	top:-.2em;
+}
+
+#remove_watermarks_wrapper {
+	padding-right:35px;
+	position:relative;
+	top:-7px;
+	font-size:14px;
+	color:#00002e;
+}
+
+#make_avatar_button {
+	padding-top:35px;
+	text-align:center;
+}
+
+.longwatermark .watermark {
+	position:absolute;
+	top:481px;
+	left:5px;
+}
+
+.mask-right {
+	position:relative;
+}
+
+.mask-right .watermark {
+	position:absolute;
+	top:51px;
+	left:160px;
 }

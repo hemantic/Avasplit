@@ -34,8 +34,9 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 		
 		<div style="width:612px; position:absolute">
 		
-		<div style="position:relative; float:left" onMouseMove="dragIt(event)" onMouseDown="start_drag(event)" onMouseUp="end_drag()">
-			<img src="./images/mask_long_500.png">
+		<div style="position:relative; float:left" onMouseMove="dragIt(event)" onMouseDown="start_drag(event)" onMouseUp="end_drag()" class="longwatermark">
+			<img src="./images/mask_long_500_nowatermarks.png">
+			<img src="./images/watermark.png" class="watermark"/>
 		</div>
 		
 		<div id="right_text_block">
@@ -65,7 +66,9 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 			
 			
 		</div>
-			<div onMouseMove="dragIt(event)" onMouseDown="start_drag(event)" onMouseUp="end_drag()" style="background-image:url(images/mask_right_new.png); height:84px;"></div>
+			<div class="mask-right" onMouseMove="dragIt(event)" onMouseDown="start_drag(event)" onMouseUp="end_drag()" style="background-image:url(images/mask_right_new_nowatermarks.png); height:84px;">
+				<img src="./images/watermark_mini.png" class="watermark"/>
+			</div>
 			<div style="background-color:#FFFFFF;">
 				<img src="./images/wall_ap.png" style="margin:0px; " class="opacity" alt="">
 			</div>
@@ -82,18 +85,7 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 		</div>
 		</div>
 	</div>
-	<a style="
-			cursor:pointer; 
-			font-size:14px;
-			 position:absolute; 
-			 left:300px;
-			 margin-top:30px;
-			 color: #41658c;
-			 z-index:1000;
-			 padding:10px;
-			 background-color:#e9edf1;
-			 text-decoration:none;"
-		onClick="cut();">Сделать аватарку</a>
+		<div id="make_avatar_button"><span id="remove_watermarks_wrapper"><input type="checkbox" id="remove_watermarks" onchange="if(this.checked){$('.watermark').hide()}else{$('.watermark').show()}"/>Убрать водяные знаки</span><a onClick="cut();"><img src="/images/save-button.png" alt="Сохранить"/></a></div>
 	</div>
 	<script>//getUserInfo();</script>
 	<? } else if ($_POST["type"] == "list") { ?>
