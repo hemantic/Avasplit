@@ -1,6 +1,7 @@
 <?php
 error_reporting(0); // Отображаем все ошибки и предупреждения
 include "simple.php"; // Подключаем класс SimpleImage();
+include "avasplit.class.php"; // Подключаем генератор аватарок
 
 require_once "HTTP/Request.php";
 require_once "_db.php";
@@ -101,6 +102,7 @@ function createAlbum ($id, $width, $height, $crop_width, $crop_height, $req_prof
     $zip -> close();
     
     $res['arch'] = $arch_name;
+    $res['arch'] = $id;
     
     return json_encode($res);
   }
@@ -168,6 +170,7 @@ function createAvatar ($id, $width, $height, $crop_width, $crop_height, $req_pro
     $res['upload_result'] = json_decode($req_album->getResponseBody());*/
     
     $res['arch'] = $arch_name;
+    $res['id'] = $id;
     
     return json_encode($res);
   }

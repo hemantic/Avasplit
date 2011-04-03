@@ -85,7 +85,10 @@ if (move_uploaded_file($_FILES['filename']['tmp_name'], $uploadfile)) {
 		</div>
 		</div>
 	</div>
-		<div id="make_avatar_button"><span id="remove_watermarks_wrapper"><input type="checkbox" id="remove_watermarks" onchange="if(this.checked){$('.watermark').hide()}else{$('.watermark').show()}"/>Убрать водяные знаки</span><a onClick="cut();"><img src="/images/save-button.png" alt="Сохранить"/></a></div>
+		<div id="make_avatar_button">
+			<span id="remove_watermarks_wrapper"><label><input type="checkbox" id="remove_watermarks" onchange="if(this.checked){$('.watermark').hide()}else{$('.watermark').show()}"/>Убрать водяные знаки</label></span>
+			<a onClick="cut();"><img src="/images/save-button.png" alt="Сохранить"/></a>
+		</div>
 	</div>
 	<script>//getUserInfo();</script>
 	<? } else if ($_POST["type"] == "list") { ?>

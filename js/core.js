@@ -247,7 +247,11 @@ function cut(){ // Функция обрезки картинки
                $('#second').css('display', 'none'); 
                $('#help').css('display', 'none'); 
                $('#slider').css('display', 'none'); 
-               $('#third').css('display', 'block');
+               if(!$("#remove_watermarks").attr('checked')){
+                    $('#third').show();
+               } else {
+                    document.location.href = '/pay.php?id='+data.id;
+               }
                $('#workspace').css('height', '430px');
           }
      );	   
