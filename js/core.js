@@ -230,7 +230,8 @@ $(document).ready(function(){
 				          filename: filename, 
 				          filetype: filetype,
 			            upload_url: vk_upload_url,
-			            profile_upload_url: vk_profile_upload_url  }, function(data) { 
+			            profile_upload_url: vk_profile_upload_url,
+			            wall_upload_url: vk_wall_upload_url  }, function(data) { 
 			           data = jQuery.parseJSON(data);
 			           vk_funish_uploads(data, onVkFinishUploadsSuccess); 
 					       $('#link').attr('href', data.arch); 

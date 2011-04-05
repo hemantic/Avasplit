@@ -70,6 +70,10 @@ if($_POST["profile_upload_url"]) {
   $req_profile =& new HTTP_Request($_POST["upload_url"]);
   $req_profile->setMethod(HTTP_REQUEST_METHOD_POST);
 }
+/*if($_POST["wall_upload_url"]) {
+  $req_wall =& new HTTP_Request($_POST["wall_upload_url"]);
+  $req_wall->setMethod(HTTP_REQUEST_METHOD_POST);
+}*/
 
 if ($_POST["album"] != NULL) { 
 
