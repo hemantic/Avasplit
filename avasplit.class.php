@@ -1,5 +1,10 @@
 <?php
 
+require_once "_db.php";
+
+$avasplit = new AvaSplit();
+echo $avasplit->load(5);
+
 class AvaSplit {
     var $id; // идентификатор заказа в системе
     var $width;
@@ -13,6 +18,28 @@ class AvaSplit {
     var $type; // free для бесплатных аватарок (с водяными знаками) и premium для платных
     var $status; // статус оплаты. free/paid/notpaid
     var $price; // цена за аватарку
+    
+    function setDimentions($width, $height) {
+        $this->width = intval($width);
+        $this->height = intval($height);
+    }
+    
+    function setFileData($filename, $filetype) {
+        $this->filename = $filename;
+        $this->filetype = $filetype;
+    }
+    
+    function setAvatarType($type) {
+        $this->type = $type;
+    }
+    
+    function setPaymentStatus($status) {
+        $this->status = $status;
+    }
+    
+    function setPrice($price) {
+        $this->price = $pice;
+    }
     
     function setCropDimentions($crop_width, $crop_height) {
         $this->crop_width = $crop_width;
@@ -29,7 +56,25 @@ class AvaSplit {
             return false;
         }
         
+        $id=intval($id);
         
+        $request = 'SELECT * FROM avatars WHERE id='.$id; // выбираем все записи из таблицы с аватарами, которые относятся к заданному id
+        $result = mysql_query($request);
+        
+        $avatar = mysql_fetch_row($result, 0);
+        
+        $this->id = $id;
+        $this->width = $avatar['width'];
+        $this->height = $avatar['height'];
+        $this->crop_width = $avatar['crop_width']; 
+        $this->crop_height = $avatar['crop_height']; 
+        $this->req_profile = $avatar['req_profile'];
+        $this->req_album = $avatar['req_album'];
+        $this->filename = $avatar['filename'];
+        $this->filetype = $avatar['filetype'];
+        $this->type = $avatar['type']; 
+        $this->status = $avatar['status']; 
+        $this->price = $avatar['price'];
     }
     
     function save() {
@@ -84,7 +129,7 @@ class AvaSplit {
                       \''.$this->req_album.'\'
             );';
             
-            mysql_query($request);
+            $result = mysql_query($request);
         }
         
         return $this->id;
@@ -92,6 +137,10 @@ class AvaSplit {
     
     function getId() {
         return $this->id;
+    }
+    
+    function getPaymentStatus() {
+        return $this->status;
     }
     
     function createAvatar() {
@@ -167,7 +216,53 @@ class AvaSplit {
     }
     
     function createAlbum() {
+        $image = new SimpleImage(); 
+        $zip = new ZipArchive();
         
+        // Делаем начальное изобржаение(загруженное пользователем) нужного нам размера
+        
+        $image->load("photo/".$filename);
+        $image->resize($width, $height);
+        $image->save("photo/".$filename);
+        
+        $arch_name = "archives/avasplit".$id.".zip";
+        
+        $res = array();
+        if ($zip->open($arch_name, ZIPARCHIVE::CREATE) === TRUE) {
+            $res['upload_result'] = array();
+            for ($i = 0; $i < 3; $i++) {
+                for ($j = 0; $j < 4; $j++) {
+                    
+                    $num++;
+                    $filename_new = "photo/".$i."-".$j."_".$filename;
+                    
+                    $image->load("photo/".$filename);
+                    $image->copyImage($left[$j], $top[$i], $crop_width, $crop_height);
+                    if ($num == 7) {
+                        $watermark = imagecreatefrompng("images/watermark_album.png");
+                        $image->watermark($image->image, $watermark, 80);
+                        imagedestroy($watermark);
+                    }
+                    
+                    $image->save($filename_new);
+                    $zip -> addFile($filename_new, $num.".".$filetype);
+                    
+                    $req_album->addFile('file'.$j, $filename_new, 'image/'.$filetype);
+                }
+                
+                $req_album->sendRequest();
+                $res['upload_result'][] = json_decode($req_album->getResponseBody());
+                $req_album =& new HTTP_Request($_POST["upload_url"]);
+                $req_album->setMethod(HTTP_REQUEST_METHOD_POST);
+            }
+            
+            $zip -> close();
+            
+            $res['arch'] = $arch_name;
+            $res['arch'] = $id;
+            
+            return json_encode($res);
+        }
     }
     
     function getZip() {
