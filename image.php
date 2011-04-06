@@ -70,10 +70,10 @@ if($_POST["profile_upload_url"]) {
   $req_profile =& new HTTP_Request($_POST["upload_url"]);
   $req_profile->setMethod(HTTP_REQUEST_METHOD_POST);
 }
-/*if($_POST["wall_upload_url"]) {
+if($_POST["wall_upload_url"]) {
   $req_wall =& new HTTP_Request($_POST["wall_upload_url"]);
   $req_wall->setMethod(HTTP_REQUEST_METHOD_POST);
-}*/
+}
 
 if ($_POST["album"] != NULL) { 
 
@@ -120,9 +120,7 @@ if ($_POST["album"] != NULL) {
 	if ($zip->open($arch, ZIPARCHIVE::CREATE) === TRUE) {
 		for ($i = 0; $i < count($crop_width); $i++)
 		{
-			$c = 6 - $i;
-			if (count($crop_width) == 5) $c = 5 - $i;
-			 // Генерируем инвертированные номера для имен нарезки
+			$c = count($crop_width) - $i; // Генерируем инвертированные номера для имен нарезки
 			$filename_new = "photo/".$i."_".$filename; // Генерируем имя файла будующего изображения
 			
 			$canvas = imagecreatetruecolor($crop_width[$i], $crop_height[$i]);
@@ -143,6 +141,10 @@ if ($_POST["album"] != NULL) {
 					imagedestroy($watermark);
 					$image->resize(400, 304);
 				}
+			else if ($i == 6)
+				{
+					$image->resize(130, 130);
+				}
 			else 
 				{
 					$image->resize(400, 304);
@@ -156,6 +158,9 @@ if ($_POST["album"] != NULL) {
 			} else {
 			  $req_album->addFile('file'.$c, $filename_new, 'image/'.$filetype);
 			}
+			if($_POST["wall_upload_url"] && $i == 6) {
+			  $req_wall->addFile('file1', $filename_new, 'image/'.$filetype);
+			}
 		
 		}
 		
@@ -166,6 +171,11 @@ if ($_POST["album"] != NULL) {
 		if($_POST["profile_upload_url"]) {
 		  $req_profile->sendRequest();
 		  $res['profile_upload_result'] = json_decode($req_profile->getResponseBody());
+		}
+		
+		if($_POST["wall_upload_url"]) {
+		  $req_wall->sendRequest();
+		  $res['wall_upload_result'] = json_decode($req_wall->getResponseBody());
 		}
 		
 		$req_album->sendRequest();
