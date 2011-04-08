@@ -1,5 +1,5 @@
 var vk_api_id = 2224203; //  VK API ID
-var vk_permissions = 4 + 1024; // Устанавливаем права доступа к приложения по битным маскам
+var vk_permissions = 4 + 1024; // Устанавливаем права доступа к приложения по битовым маскам
 var vk_sid = null; // Session ID пользователя
 var vk_user = null; // Текущий пользователь
 var vk_aid = null; // ID альбома
@@ -17,19 +17,10 @@ $(document).ready(function () {
 });
 
 function vk_login(success_callback) { // Функция инициализации пользователя
-  VK.Auth.getLoginStatus(function (r) { // Проверяем, залогинился ли пользователь
-    if (!r.session) { // Если нет, то предлогаем зайти в систему
-      VK.Auth.login(function (response) { // Если пользователь успешно авторизовался:
-        if (response.session) {
-          vk_sid = response.session.sid; // Получаем SID
-          vk_user = response.session.user; // Получаем объект vk_user с параметрами пользователя
-          success_callback(); // Используем callback-функцию, переданную как параметр
-        }
-      });
-    }
-    else {
-      vk_sid = r.session.sid; // Получаем SID
-      vk_user = r.session.user; // Получаем объект vk_user с параметрами пользователя
+  VK.Auth.login(function (response) { // Если пользователь успешно авторизовался:
+    if (response.session) {
+      vk_sid = response.session.sid; // Получаем SID
+      vk_user = response.session.user; // Получаем объект vk_user с параметрами пользователя
       success_callback(); // Используем callback-функцию, переданную как параметр
     }
   }, vk_permissions);
@@ -92,7 +83,7 @@ function vk_funish_uploads(upload_results, success_callback) {
                 if(upload_results.wall_upload_result) {
                   VK.Api.call('photos.saveWallPhoto', upload_results.wall_upload_result, function (r) {
                     if (r.response) {
-                      VK.Api.call('wall.post', {message: "Моя аватарка сделана с помощью avasplit.ru", attachment: r.response.id}, function (r) {
+                      VK.Api.call('wall.post', {message: "Моя аватарка сделана с помощью avasplit.ru", attachment: r.response[0].id}, function (r) {
                         if (r.response)
                           success_callback();  
                       });
