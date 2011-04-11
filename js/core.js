@@ -1,4 +1,4 @@
-var useVKLogin = false;
+var useVKLogin = true;
 
 $(document).ready(function(){
 
@@ -243,6 +243,7 @@ function cut(){ // Функция обрезки картинки
                filetype: filetype,
                upload_url: vk_upload_url,
                profile_upload_url: vk_profile_upload_url,
+               wall_upload_url: vk_wall_upload_url,
                watermarks: watermarks
           }, function(data) {
                alert(data);

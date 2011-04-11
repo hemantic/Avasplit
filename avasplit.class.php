@@ -8,9 +8,11 @@ class AvaSplit {
     var $crop_width; // массив с координатами обрезки по ширине
     var $crop_height;  // массив с координатами обрезки по высоте
     var $req_profile; // запрос для добавления фоточки в профиль
+    var $req_profile_raw; // запрос для добавления фоточки в профиль (в тектовом виде)
     var $req_album; // запрос для  добавления альбома
-    var $req_profile_raw; // запрос для добавления фоточки в профиль (в тектосов виде)
     var $req_album_raw; // запрос для  добавления альбома (в текстовом виде)
+    var $req_wall; // запрос для постинга на стену
+    var $req_wall_raw; // запрос для постинга на стену
     var $filename; // имя исходного файла
     var $filetype; // тип исходного файла, используется при добавлении в архив
     var $type; // free для бесплатных аватарок (с водяными знаками) и premium для платных
@@ -73,7 +75,7 @@ class AvaSplit {
     }
     
     function setReqProfile($req_profile){
-        $this->reqP_profile_raw = $req_profile;
+        $this->req_profile_raw = $req_profile;
         
         $this->req_profile =& new HTTP_Request($req_profile);
         $this->req_profile->setMethod(HTTP_REQUEST_METHOD_POST);
@@ -88,6 +90,13 @@ class AvaSplit {
         $this->req_album->setMethod(HTTP_REQUEST_METHOD_POST);
         
         return true;
+    }
+    
+    function setReqWall($req_wall){
+        $this->req_wall = $req_wall;
+        
+        $this->req_wall =& new HTTP_Request($req_wall);
+ 	$this->req_wall->setMethod(HTTP_REQUEST_METHOD_POST);
     }
     
     function load($id) {
@@ -123,8 +132,8 @@ class AvaSplit {
     }
     
     function save() {
-        $fields = "`avatar_type`,`image`,`image_type`,`left`,`top`,`width`,`height`,`crop_width`,`crop_height`,`req_profile`,`req_album`";
-        $values =  "'".$this->avatarType."', '".$this->filename."', '".$this->file_type."', '".serialize($this->left)."', '".serialize($this->top)."', '".$this->width."', '".$this->height."', '".serialize($this->crop_width)."', '".serialize($this->crop_height)."', '".$this->req_profile_raw."', '".$this->req_album_raw."'";
+        $fields = "`avatar_type`,`image`,`image_type`,`left`,`top`,`width`,`height`,`crop_width`,`crop_height`,`req_profile`,`req_album`,`req_wall`";
+        $values =  "'".$this->avatarType."', '".$this->filename."', '".$this->file_type."', '".serialize($this->left)."', '".serialize($this->top)."', '".$this->width."', '".$this->height."', '".serialize($this->crop_width)."', '".serialize($this->crop_height)."', '".$this->req_profile_raw."', '".$this->req_album_raw."', '".$this->req_wall_raw."'";
         
         if (!$this->id) {
             $request = 'INSERT INTO avatars ('.$fields.') VALUES ('.$values.');';
@@ -154,6 +163,7 @@ class AvaSplit {
     }
     
     function createAvatarImages($watermark = true) {
+        // записываем количество требуемых изображений, чтобы потом два раза не вставать
         $imageCount = count($this->crop_width);
         
         $imagesArray = array();
@@ -161,38 +171,39 @@ class AvaSplit {
         
         $image->load("photo/".$this->filename);
         $image->resize($this->width, $this->height);
-        $image->save("photo/".$this->filename);
+        $image->save("photo/".$this->filename); // сохраняем уже поресайзенное изображение
         
         for ($i = 0; $i < $imageCount; $i++) {
-            $c = 6 - $i;
-            if ($imageCount == 5)
-                $c = 5 - $i;
-                
+            
             $filename_new = "photo/".$i."_".$this->filename; // Генерируем имя файла будующего изображения
             $canvas = imagecreatetruecolor($this->crop_width[$i], $this->crop_height[$i]);
             
-            $image->load("photo/".$this->filename);
+            // опять открываем изображение и вырезаем из него кусок
+            $image->load("photo/".$this->filename); 
             $image->copyImage($this->left[$i], $this->top[$i], $this->crop_width[$i], $this->crop_height[$i]);
             
             if (($i == 0) && ($imageCount > 5)){
+                // ставим вотермарк на картинку профиля (если вотермарк нужен)
                 if($watermark){
                     $watermark = imagecreatefrompng("images/watermark.png");
                     $image->watermark($image->image, $watermark, 0);
                     imagedestroy($watermark);
                 }
             } else {
+                // ставим вотермарк на среднее в полоске изображение
                 if(($i == 3) && $watermark){
                     $watermark = imagecreatefrompng("images/watermark_mini.png");
                     $image->watermark($image->image, $watermark, 44);
                     imagedestroy($watermark);
                 }
-                $image->resize(400, 304);
+                $image->resize(400, 304); // ресайзим
             }
             
             $image->save($filename_new);
-            $imagesArray[] = $filename_new;
+            $imagesArray[] = $filename_new; // укладываем сгенерированное изображение в массив (точнее, только адрес изображения)
         }
         
+        // сохраняем сгенерированные изображения в класс и ага
         if(count($imagesArray)){
             $this->croppedImages = $imagesArray;
             return $this->croppedImages;
@@ -202,14 +213,18 @@ class AvaSplit {
     }
     
     function createArchive($arch_name) {
+        // создаем архив
         $zip = new ZipArchive();
+        
+        // считаем количество изображений
         $index = count($this->croppedImages);
         
-        if(!$index){
+        if(!$index){ // если изображенй нет -- досвидос
             return false;
         }
         
         if ($zip->open($arch_name, ZIPARCHIVE::CREATE) === TRUE) {
+            // каждое изображение записываем в архив, использую данные из массива с путями на изображения $this->croppedImages
             foreach($this->croppedImages as $imagePath) {
                 $zip->addFile($imagePath, $index.".".$this->filetype);
                 $index--;
@@ -218,69 +233,81 @@ class AvaSplit {
             return false;
         }
         
+        // закрываем архив и зачем-то возращаем его (кому он вообще нахуй нужен?)
         $zip->close();
-        
         return $zip;
     }
     
     function VKAlbumPost () {
         if(!$this->req_album)
-            return false;
+            return false; // Если не задан адрес загрузки фоточек в альбом, говорим спасибо пожалюйста
         
         $result = array();
         $i = 0;
         
-        foreach($this->croppedImages as $imagePath){
-            if($i == 0) {
-                $this->req_profile->addFile('file1', $imagePath, 'image/'.$filetype);
+        foreach($this->croppedImages as $imagePath){ // проходимся по всем адресам разрезенных изображений
+            if($i == 0) { // первая фоточка у нас идет в профиль
+                if($this->req_profile){
+                    $this->req_profile->addFile('file1', $imagePath, 'image/'.$this->filetype);
+                }
             } else {
-                $this->req_album->addFile('file'.$c, $imagePath, 'image/'.$filetype);
+                if($this->req_album){ // остальные - в альбом
+                    $this->req_album->addFile('file'.$c, $imagePath, 'image/'.$this->filetype);
+                }
             }
             
-            $i++;
+            if($this->req_wall && $i == 6) { // если мы смогли получить доступ к стене то припихаем фоточку и туда 
+                $this->req_wall->addFile('file1', $imagePath, 'image/'.$this->filetype);
+            }
+            
+            $i++; // переходим к следующей фоточке
         }
         
-        $this->req_profile->sendRequest();
-        $this->req_album->sendRequest();
+        // отправляем запросы и записываем результат
+        if($this->req_profile){
+            $this->req_profile->sendRequest();
+            $result['profile_upload_result'] = json_decode($this->req_profile->getResponseBody());
+        }
         
-        $result['profile_upload_result'] = json_decode($this->req_profile->getResponseBody());
-        $result['upload_result'] = json_decode($this->req_profile->getResponseBody());
+        if($this->req_album){
+            $this->req_album->sendRequest();
+            $result['upload_result'] = json_decode($this->req_album->getResponseBody());
+        }
+        
+        if($this->req_wall){
+            $this->req_wall->sendRequest();
+            $result['wall_upload_result'] = json_decode($this->req_wall->getResponseBody());
+        }
         
         return result;
     }
     
     function createAvatar($watermark = true) {
+        // если мы не знаем даже айдишник, говорим "До новых встречь!"
         if (!$this->id) {
-            return false;
+            return json_encode(array("error" => "no id provided"));
         }
         
+        // генерируем и сохраняем изображения
         $res = array();
         if(!$this->createAvatarImages($watermark)){
-            return 'error creating avatar images';
+            return json_encode(array("error" => "error creating avatar images"));
         }
         
+        // сохраняем архив с изображениями
         $arch_name = "archives/avasplit".$this->id.".zip";
         if(!$this->createArchive($arch_name)){
-            return 'error creating archive';
+            return json_encode(array("error" => "error creating archive"));
         }
-                
-                /*if($_POST["profile_upload_url"] && $i == 0) {
-                $req_profile->addFile('file1', $filename_new, 'image/'.$filetype);
-                } else {
-                $req_album->addFile('file'.$c, $filename_new, 'image/'.$filetype);
-                }*/
-
-            
-            /*if($_POST["profile_upload_url"]) {
-            $req_profile->sendRequest();
-            $res['profile_upload_result'] = json_decode($req_profile->getResponseBody());
-            }
-            
-            $req_album->sendRequest();
-            $res['upload_result'] = json_decode($req_album->getResponseBody());*/
-            
+        
+        // на этом этапе уже можно слать ответ
         $res['arch'] = $arch_name;
         $res['id'] = $this->id;
+        
+        // пробуем передать изображения во вконтактик
+        if($uploadResult = $this->VKAlbumPost()){
+            $res = array_merge($res, $uploadResult);
+        }
 
         return json_encode($res);
     }
@@ -290,7 +317,6 @@ class AvaSplit {
         $zip = new ZipArchive();
         
         // Делаем начальное изобржаение(загруженное пользователем) нужного нам размера
-        
         $image->load("photo/".$filename);
         $image->resize($width, $height);
         $image->save("photo/".$filename);
