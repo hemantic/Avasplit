@@ -399,10 +399,10 @@ function uploadImage() {
           $('#slider').css('width', '350'); 
      } else if ($('#type').attr('value') == 'album') { 
           $('#slider').css('top', '615'); 
-          $('#slider').css('width', '350'); 
+          $('#slider').css('width', '270'); 
      } else if ($('#type').attr('value') == 'avalist') { 
           $('#slider').css('top', '205'); 
-          $('#slider').css('width', '350'); 
+          $('#slider').css('width', '270'); 
           $('#slider').css('top', '40');
           $('#slider').css('left', '220');
      }
