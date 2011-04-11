@@ -9,11 +9,14 @@ class AvaSplit {
     var $crop_height;  // массив с координатами обрезки по высоте
     var $req_profile; // запрос для добавления фоточки в профиль
     var $req_album; // запрос для  добавления альбома
+    var $req_profile_raw; // запрос для добавления фоточки в профиль (в тектосов виде)
+    var $req_album_raw; // запрос для  добавления альбома (в текстовом виде)
     var $filename; // имя исходного файла
     var $filetype; // тип исходного файла, используется при добавлении в архив
     var $type; // free для бесплатных аватарок (с водяными знаками) и premium для платных
     var $status; // статус оплаты. free/paid/notpaid
     var $price; // цена за аватарку
+    var $avatarType; // тип аватарки (альбом, стена, etc...)
     
     var $croppedImages; // сгенерированные изображения
     
@@ -31,7 +34,13 @@ class AvaSplit {
         return true;
     }
     
-    function setAvatarType($type) {
+    function setAvatarType($avatarType){
+        $this->avatarType = $avatarType;
+        
+        return true;
+    }
+    
+    function setOrderType($type) {
         $this->type = $type;
         
         return true;
@@ -64,6 +73,8 @@ class AvaSplit {
     }
     
     function setReqProfile($req_profile){
+        $this->reqP_profile_raw = $req_profile;
+        
         $this->req_profile =& new HTTP_Request($req_profile);
         $this->req_profile->setMethod(HTTP_REQUEST_METHOD_POST);
         
@@ -71,6 +82,8 @@ class AvaSplit {
     }
     
     function setReqAlbum($req_album){
+        $this->req_album_raw = $req_album;
+        
         $this->req_album =& new HTTP_Request($req_album);
         $this->req_album->setMethod(HTTP_REQUEST_METHOD_POST);
         
@@ -87,6 +100,9 @@ class AvaSplit {
         $request = 'SELECT * FROM avatars WHERE id='.$id; // выбираем все записи из таблицы с аватарами, которые относятся к заданному id
         $result = mysql_query($request);
         
+        if(!$result)
+            return false;
+        
         $avatar = mysql_fetch_row($result, 0);
         
         $this->id = $id;
@@ -94,69 +110,31 @@ class AvaSplit {
         $this->height = $avatar['height'];
         $this->crop_width = $avatar['crop_width']; 
         $this->crop_height = $avatar['crop_height']; 
-        $this->req_profile = $avatar['req_profile'];
-        $this->req_album = $avatar['req_album'];
+        $this->setReqProfile($avatar['req_profile']);
+        $this->setReqAlbum($avatar['req_album']);
         $this->filename = $avatar['filename'];
         $this->filetype = $avatar['filetype'];
         $this->type = $avatar['type']; 
         $this->status = $avatar['status']; 
         $this->price = $avatar['price'];
+        $this->avatarType = $avatar['avatar_type'];
         
         return $this;
     }
     
     function save() {
+        $fields = "`avatar_type`,`image`,`image_type`,`left`,`top`,`width`,`height`,`crop_width`,`crop_height`,`req_profile`,`req_album`";
+        $values =  "'".$this->avatarType."', '".$this->filename."', '".$this->file_type."', '".serialize($this->left)."', '".serialize($this->top)."', '".$this->width."', '".$this->height."', '".serialize($this->crop_width)."', '".serialize($this->crop_height)."', '".$this->req_profile_raw."', '".$this->req_album_raw."'";
+        
         if (!$this->id) {
-            $request = 'INSERT INTO avatars (
-                      `image`,
-                      `image_type`,
-                      `left`,
-                      `top`,
-                      `width`,
-                      `height`,
-                      `crop_width`,
-                      `crop_height`,
-                      `req_profile`,
-                      `req_album`
-                    ) VALUES (
-                      \''.$this->filename.'\',
-                      \''.$this->file_type.'\',
-                      \''.serialize($this->left).'\',
-                      \''.serialize($this->top).'\',
-                      \''.$this->width.'\',
-                      \''.$this->height.'\',
-                      \''.serialize($this->crop_width).'\',
-                      \''.serialize($this->crop_height).'\',
-                      \''.$this->req_profile.'\',
-                      \''.$this->req_album.'\');';
-      
-            mysql_query($request);
+            $request = 'INSERT INTO avatars ('.$fields.') VALUES ('.$values.');';
+            if(!mysql_query($request)){
+                echo mysql_error();
+            }
+        
             $this->id = mysql_insert_id();
         } else {
-            $request = 'UPDATE avatars (
-                      `image`,
-                      `image_type`,
-                      `left`,
-                      `top`,
-                      `width`,
-                      `height`,
-                      `crop_width`,
-                      `crop_height`,
-                      `req_profile`,
-                      `req_album`
-            ) SET (
-                \''.$this->filename.'\',
-                      \''.$this->file_type.'\',
-                      \''.serialize($this->left).'\',
-                      \''.serialize($this->top).'\',
-                      \''.$this->width.'\',
-                      \''.$this->height.'\',
-                      \''.serialize($this->crop_width).'\',
-                      \''.serialize($this->crop_height).'\',
-                      \''.$this->req_profile.'\',
-                      \''.$this->req_album.'\'
-            );';
-            
+            $request = 'UPDATE avatars ('.$fields.') SET ('.$values.');';
             $result = mysql_query($request);
         }
         
@@ -169,6 +147,10 @@ class AvaSplit {
     
     function getPaymentStatus() {
         return $this->status;
+    }
+    
+    function getAvatarType() {
+        return $this->avatarType;
     }
     
     function createAvatarImages($watermark = true) {
@@ -211,8 +193,12 @@ class AvaSplit {
             $imagesArray[] = $filename_new;
         }
         
-        $this->croppedImages = $imagesArray;
-        return $this->croppedImages;
+        if(count($imagesArray)){
+            $this->croppedImages = $imagesArray;
+            return $this->croppedImages;
+        } else {
+            return false;
+        }
     }
     
     function createArchive($arch_name) {
@@ -246,10 +232,12 @@ class AvaSplit {
         
         foreach($this->croppedImages as $imagePath){
             if($i == 0) {
-                $this->req_profile->addFile('file1', $filename_new, 'image/'.$filetype);
+                $this->req_profile->addFile('file1', $imagePath, 'image/'.$filetype);
             } else {
-                $this->req_album->addFile('file'.$c, $filename_new, 'image/'.$filetype);
+                $this->req_album->addFile('file'.$c, $imagePath, 'image/'.$filetype);
             }
+            
+            $i++;
         }
         
         $this->req_profile->sendRequest();
@@ -267,11 +255,14 @@ class AvaSplit {
         }
         
         $res = array();
-        
-        $this->createAvatarImages($watermark);
+        if(!$this->createAvatarImages($watermark)){
+            return 'error creating avatar images';
+        }
         
         $arch_name = "archives/avasplit".$this->id.".zip";
-        $this->createArchive($arch_name);
+        if(!$this->createArchive($arch_name)){
+            return 'error creating archive';
+        }
                 
                 /*if($_POST["profile_upload_url"] && $i == 0) {
                 $req_profile->addFile('file1', $filename_new, 'image/'.$filetype);

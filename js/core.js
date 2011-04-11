@@ -225,6 +225,11 @@ function cut(){ // Функция обрезки картинки
      var width = $("#drag").attr("width");
      var height = $("#drag").attr("height");
      
+     var watermarks = true;
+     if($("#remove_watermarks").attr("checked")){
+          watermarks = false;
+     }
+     
      // Отправляем данные на обработку PHP скрипту image.php
      var res = $.post('image.php',
           { 
@@ -237,7 +242,8 @@ function cut(){ // Функция обрезки картинки
                filename: filename, 
                filetype: filetype,
                upload_url: vk_upload_url,
-               profile_upload_url: vk_profile_upload_url
+               profile_upload_url: vk_profile_upload_url,
+               watermarks: watermarks
           }, function(data) { 
                data = jQuery.parseJSON(data);
                if(useVKLogin){

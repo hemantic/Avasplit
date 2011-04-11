@@ -6,23 +6,30 @@ include "avasplit.class.php"; // Подключаем генератор ава�
 require_once "HTTP/Request.php";
 require_once "_db.php";
 
-/*$req_album =& new HTTP_Request($_POST["upload_url"]);
-$req_album->setMethod(HTTP_REQUEST_METHOD_POST);
-if($_POST["profile_upload_url"]) {
-  $req_profile =& new HTTP_Request($_POST["upload_url"]);
-  $req_profile->setMethod(HTTP_REQUEST_METHOD_POST);
-}*/
+//$watermarks = (isset($_POST["watermarks"]) && $_POST["watermarks"]==1) ? false : true;
 
 $avatar = new AvaSplit();
 $avatar->setDimentions($_POST["width"], $_POST["height"]);
 $avatar->setCropDimentions($_POST["crop_w"], $_POST["crop_h"]);
 $avatar->setPosition($_POST["left"], $_POST["top"]);
 $avatar->setFileData($_POST["filename"], $_POST["filetype"]);
+
+if($_POST["upload_url"])
+  $avatar->setReqAlbum($_POST["upload_url"]);
+if($_POST["profile_upload_url"])
+  $avatar->setReqProfile($_POST["profile_upload_url"]);
+
+if($_POST["album"]) {
+  $avatar->setAvatarType("album");
+} else {
+  $avatar->setAvatarType("avasplit");
+}
+
 $avatar->save();
 
 if ($_POST["album"] == NULL) {
   echo $avatar->createAvatar();
 } else {
-  echo $avatar->createAlbum();
+  echo $avatar->createAlbum($watermarks);
 }
 ?>
