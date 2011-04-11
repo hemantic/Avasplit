@@ -6,7 +6,7 @@ include "avasplit.class.php"; // Подключаем генератор ава�
 require_once "HTTP/Request.php";
 require_once "_db.php";
 
-//$watermarks = (isset($_POST["watermarks"]) && $_POST["watermarks"]==1) ? false : true;
+$watermarks = (isset($_POST["watermarks"]) && $_POST["watermarks"]==1) ? false : true;
 
 $avatar = new AvaSplit();
 $avatar->setDimentions($_POST["width"], $_POST["height"]);
@@ -28,7 +28,7 @@ if($_POST["album"]) {
 $avatar->save();
 
 if ($_POST["album"] == NULL) {
-  echo $avatar->createAvatar();
+  echo $avatar->createAvatar($watermarks);
 } else {
   echo $avatar->createAlbum($watermarks);
 }
